@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
-type Deadline = { name: string; short: string; date: string; color: string; note?: string; sourceStatus?: string };
-type ManagedConference = { id: number; name: string; deadline: string | null; deadline_status: string; source_name: string | null };
+type Deadline = { name: string; short: string; date: string; color: string; note?: string; sourceStatus?: string; website?: string };
+type ManagedConference = { id: number; name: string; deadline: string | null; deadline_status: string; source_name: string | null; source_url: string | null; website_url: string | null };
 
 const deadlines: Deadline[] = [
   { name: "ICDCS", short: "ICDCS", date: "2026-01-14", color: "#2563eb" },
@@ -34,7 +34,31 @@ const deadlines: Deadline[] = [
 ];
 
 const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-const dynamicColors = ["#2563eb", "#7c3aed", "#0891b2", "#059669", "#db2777", "#ea580c", "#4f46e5"];
+const dynamicColors = ["#4f6b8f", "#6f628f", "#3f7481", "#4f7b69", "#94647a", "#9a704e", "#59658c"];
+const conferenceSites: Record<string, string> = {
+  "ICDCS": "https://icdcs2026.icdcs.org/",
+  "e-Energy Spring": "https://energy.acm.org/conferences/eenergy/",
+  "e-Energy Fall": "https://energy.acm.org/conferences/eenergy/",
+  "BuildSys": "https://buildsys.acm.org/2026/",
+  "SIGCOMM 2026": "https://conferences.sigcomm.org/sigcomm/2026/",
+  "SC": "https://supercomputing.org/",
+  "ASPLOS Spring": "https://www.asplos-conference.org/asplos2026/",
+  "ASPLOS Fall": "https://www.asplos-conference.org/asplos2026/",
+  "NSDI Spring": "https://www.usenix.org/conference/nsdi26",
+  "NSDI Fall": "https://www.usenix.org/conference/nsdi26",
+  "SmartGridComm": "https://www.comsoc.org/conferences-events/ieee-international-conference-communications-control-and-computing-7",
+  "NeurIPS": "https://neurips.cc/",
+  "EuroSys Spring": "https://2026.eurosys.org/",
+  "EuroSys Fall": "https://2026.eurosys.org/",
+  "HotCarbon": "https://hotcarbon.org/",
+  "ATC": "https://www.usenix.org/conference/atc26",
+  "HotNets": "https://conferences.sigcomm.org/hotnets/2025/",
+  "SoCC": "https://acmsocc.org/",
+  "INFOCOM 2027": "https://infocom2027.ieee-infocom.org/",
+  "HPCA": "https://hpca-conf.org/",
+  "MLSys": "https://mlsys.org/",
+  "ISCA": "https://iscaconf.org/",
+};
 
 function shortName(name: string) {
   const compact = name.replace(/\b20\d{2}\b/g, "").trim();
@@ -65,7 +89,7 @@ function layoutDeadlineLabels(items: Deadline[], total: number) {
     const angle = (dayOfYear(date) / total) * 360;
     const marker = point(angle, 230);
     const elbow = point(angle, 252);
-    return { ...item, angle, marker, elbow, side: marker.x >= 300 ? "right" as const : "left" as const, labelY: elbow.y, lane: 0 };
+    return { ...item, website: item.website ?? conferenceSites[item.name], angle, marker, elbow, side: marker.x >= 300 ? "right" as const : "left" as const, labelY: elbow.y, lane: 0 };
   });
 
   const arrange = (side: "left" | "right") => {
@@ -110,8 +134,8 @@ function DeadlineDial({ year, now, items }: { year: number; now: Date; items: De
         <defs>
           <filter id="soft-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="8" stdDeviation="12" floodColor="#0f172a" floodOpacity="0.12" /></filter>
           <filter id="needle-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
-          <linearGradient id="needle-gradient" gradientUnits="userSpaceOnUse" x1="300" y1="300" x2={currentPoint.x} y2={currentPoint.y}><stop offset="0" stopColor="#fb7185" /><stop offset="0.55" stopColor="#ef4444" /><stop offset="1" stopColor="#be123c" /></linearGradient>
-          <radialGradient id="hub-gradient"><stop offset="0" stopColor="#ffffff" /><stop offset="0.55" stopColor="#fecdd3" /><stop offset="1" stopColor="#e11d48" /></radialGradient>
+          <linearGradient id="needle-gradient" gradientUnits="userSpaceOnUse" x1="300" y1="300" x2={currentPoint.x} y2={currentPoint.y}><stop offset="0" stopColor="var(--needle-start)" /><stop offset="0.6" stopColor="var(--needle-mid)" /><stop offset="1" stopColor="var(--needle-end)" /></linearGradient>
+          <radialGradient id="hub-gradient"><stop offset="0" stopColor="var(--hub-light)" /><stop offset="0.62" stopColor="var(--hub-mid)" /><stop offset="1" stopColor="var(--needle-end)" /></radialGradient>
         </defs>
         <circle cx="300" cy="300" r="235" fill="var(--dial-face)" stroke="var(--dial-stroke)" strokeWidth="2" filter="url(#soft-shadow)" />
         {months.map((month, i) => {
@@ -123,7 +147,7 @@ function DeadlineDial({ year, now, items }: { year: number; now: Date; items: De
             <text x={mid.x} y={mid.y + 4} textAnchor="middle" className="month-label">{month}</text>
           </g>;
         })}
-        <path d={sectorPath(0, Math.max(nowAngle, 0.5), 84, 150)} fill="#ef4444" opacity="0.12" />
+        <path d={sectorPath(0, Math.max(nowAngle, 0.5), 84, 150)} fill="var(--needle-mid)" opacity="0.09" />
         <circle cx="300" cy="300" r="156" fill="var(--dial-inner)" stroke="var(--dial-stroke)" strokeWidth="2" />
         <circle cx="300" cy="300" r="83" fill="var(--dial-core)" stroke="var(--dial-stroke)" strokeWidth="1.5" />
         {Array.from({ length: 48 }, (_, i) => {
@@ -139,25 +163,26 @@ function DeadlineDial({ year, now, items }: { year: number; now: Date; items: De
           const lineEndX = right ? labelX - 11 : labelX + 11;
           const textWidth = item.short.length * 6.1;
           const boxX = right ? labelX - 8 : labelX - textWidth - 8;
-          return <g key={`${item.name}-${item.date}`}>
+          return <a key={`${item.name}-${item.date}`} href={item.website} target="_blank" rel="noreferrer" className="deadline-link" aria-label={`Open ${item.name} conference website`}>
             <path d={`M ${item.marker.x} ${item.marker.y} L ${item.elbow.x} ${item.elbow.y} L ${lineEndX} ${item.labelY}`} fill="none" stroke={item.color} strokeWidth="1.15" strokeDasharray="2.5 2.5" opacity="0.62" />
-            <circle cx={item.marker.x} cy={item.marker.y} r="7" fill={item.color} stroke="white" strokeWidth="3" />
+            <circle className="deadline-marker" cx={item.marker.x} cy={item.marker.y} r="7" fill={item.color} stroke="var(--surface-solid)" strokeWidth="3" />
             <rect x={boxX} y={item.labelY - 10} width={textWidth + 16} height="20" rx="6" className="deadline-label-box" stroke={item.color} />
             <text x={labelX} y={item.labelY + 3.2} textAnchor={right ? "start" : "end"} className="deadline-label" fill={item.color}>{item.short}</text>
-          </g>;
+          </a>;
         })}
-        <line x1={needleTail.x} y1={needleTail.y} x2={currentPoint.x} y2={currentPoint.y} stroke="#fb7185" strokeWidth="13" strokeLinecap="round" opacity="0.16" filter="url(#needle-glow)" />
+        <line x1={needleTail.x} y1={needleTail.y} x2={currentPoint.x} y2={currentPoint.y} stroke="var(--needle-mid)" strokeWidth="11" strokeLinecap="round" opacity="0.12" filter="url(#needle-glow)" />
         <line x1={needleTail.x} y1={needleTail.y} x2={currentPoint.x} y2={currentPoint.y} stroke="url(#needle-gradient)" strokeWidth="5.5" strokeLinecap="round" />
         <line x1={needleTail.x} y1={needleTail.y} x2={currentPoint.x} y2={currentPoint.y} stroke="white" strokeWidth="1.1" strokeLinecap="round" opacity="0.72" />
-        <polygon points={arrowPoints} fill="#be123c" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
-        <circle cx={currentPoint.x} cy={currentPoint.y} r="12" fill="none" stroke="#fb7185" strokeWidth="2" opacity="0.32" className="needle-pulse" />
-        <circle cx={currentPoint.x} cy={currentPoint.y} r="4.5" fill="#be123c" stroke="white" strokeWidth="2" />
-        <circle cx="300" cy="300" r="14" fill="#fff1f2" stroke="white" strokeWidth="4" filter="url(#soft-shadow)" />
-        <circle cx="300" cy="300" r="9" fill="url(#hub-gradient)" stroke="#be123c" strokeWidth="1.5" />
+        <polygon points={arrowPoints} fill="var(--needle-end)" stroke="var(--surface-solid)" strokeWidth="1.5" strokeLinejoin="round" />
+        <circle cx={currentPoint.x} cy={currentPoint.y} r="12" fill="none" stroke="var(--needle-mid)" strokeWidth="2" opacity="0.25" className="needle-pulse" />
+        <circle cx={currentPoint.x} cy={currentPoint.y} r="4.5" fill="var(--needle-end)" stroke="var(--surface-solid)" strokeWidth="2" />
+        <circle cx="300" cy="300" r="14" fill="var(--hub-light)" stroke="var(--surface-solid)" strokeWidth="4" filter="url(#soft-shadow)" />
+        <circle cx="300" cy="300" r="9" fill="url(#hub-gradient)" stroke="var(--needle-end)" strokeWidth="1.5" />
         <circle cx="300" cy="300" r="2.5" fill="white" />
-        <text x="300" y="244" textAnchor="middle" className="today-date">{formatDate(now)}</text>
-        <text x="300" y="266" textAnchor="middle" className="today-time">{now.toLocaleTimeString("en-GB")}</text>
-        <text x="300" y="347" textAnchor="middle" className="today-meta">{items.length} DEADLINES · {year}</text>
+        <rect x="246" y="228" width="108" height="31" rx="15.5" className="center-info-plate" />
+        <text x="300" y="249" textAnchor="middle" className="today-date">{formatDate(now)}</text>
+        <rect x="252" y="337" width="96" height="28" rx="14" className="center-info-plate" />
+        <text x="300" y="356" textAnchor="middle" className="today-time">{now.toLocaleTimeString("en-GB")}</text>
       </svg>
     </div>
   );
@@ -189,8 +214,9 @@ export default function Home() {
       color: dynamicColors[index % dynamicColors.length],
       note: item.deadline_status === "estimated" ? "Estimated from previous year" : item.deadline_status === "manual" ? "Manual override" : item.source_name ?? undefined,
       sourceStatus: item.deadline_status,
+      website: item.website_url ?? item.source_url ?? conferenceSites[item.name],
     }));
-    return managed.length ? custom : deadlines;
+    return managed.length ? custom : deadlines.map((item, index) => ({ ...item, color: dynamicColors[index % dynamicColors.length], website: conferenceSites[item.name] }));
   }, [managed]);
   const yearItems = useMemo(() => allDeadlines.filter((item) => Number(item.date.slice(0, 4)) === year), [allDeadlines, year]);
   const sorted = useMemo(() => [...yearItems].sort((a, b) => a.date.localeCompare(b.date)), [yearItems]);
@@ -207,9 +233,9 @@ export default function Home() {
     </header>
     <section className="workspace">
       <div className="dial-panel">
-        <div className="panel-heading"><div><span className="section-number">01</span><h2>{year} year dial</h2></div><p>The red hand advances in real time</p></div>
+        <div className="panel-heading"><div><span className="section-number">01</span><h2>{year} year dial</h2></div><p>The hand advances in real time</p></div>
         <DeadlineDial year={year} now={now} items={yearItems} />
-        <div className="legend"><span><i className="red" /> Today</span><span><i className="blue" /> Submission deadline</span></div>
+        <div className="legend"><span><i className="hand" /> Today</span><span><i className="blue" /> Submission deadline</span></div>
       </div>
       <aside className="deadline-panel">
         <div className="panel-heading list-heading"><div><span className="section-number">02</span><h2>Deadline list</h2></div><span className="count-badge">{sorted.length}</span></div>
@@ -219,7 +245,7 @@ export default function Home() {
             const status = year === now.getFullYear() ? (days < 0 ? "PAST" : `${days}D`) : item.date.slice(5);
             return <article className="deadline-row" key={`${item.name}-${item.date}`}>
               <div className="date-tile" style={{ "--accent": item.color } as React.CSSProperties}><span>{date.toLocaleDateString("en-US", { month: "short" }).toUpperCase()}</span><strong>{date.getDate()}</strong></div>
-              <div className="deadline-copy"><h3>{item.name}</h3><p>{item.date}{item.note ? ` · ${item.note}` : ""}</p></div>
+              <div className="deadline-copy"><h3>{item.website ? <a href={item.website} target="_blank" rel="noreferrer">{item.name}</a> : item.name}</h3><p>{item.date}{item.note ? ` · ${item.note}` : ""}</p></div>
               <span className={`status ${status === "PAST" ? "past" : ""}`}>{status}</span>
             </article>;
           }) : <div className="empty-state"><CalendarDays size={30} /><strong>No deadlines</strong><span>Select another year.</span></div>}
