@@ -3,6 +3,7 @@
 import { CalendarDays, Clock3, Settings2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type Deadline = { name: string; short: string; date: string; color: string; note?: string; sourceStatus?: string };
 type ManagedConference = { id: number; name: string; deadline: string | null; deadline_status: string; source_name: string | null };
@@ -112,22 +113,22 @@ function DeadlineDial({ year, now, items }: { year: number; now: Date; items: De
           <linearGradient id="needle-gradient" gradientUnits="userSpaceOnUse" x1="300" y1="300" x2={currentPoint.x} y2={currentPoint.y}><stop offset="0" stopColor="#fb7185" /><stop offset="0.55" stopColor="#ef4444" /><stop offset="1" stopColor="#be123c" /></linearGradient>
           <radialGradient id="hub-gradient"><stop offset="0" stopColor="#ffffff" /><stop offset="0.55" stopColor="#fecdd3" /><stop offset="1" stopColor="#e11d48" /></radialGradient>
         </defs>
-        <circle cx="300" cy="300" r="235" fill="#f8fafc" stroke="#dbe5f1" strokeWidth="2" filter="url(#soft-shadow)" />
+        <circle cx="300" cy="300" r="235" fill="var(--dial-face)" stroke="var(--dial-stroke)" strokeWidth="2" filter="url(#soft-shadow)" />
         {months.map((month, i) => {
           const start = (i / 12) * 360, end = ((i + 1) / 12) * 360;
           const mid = point((start + end) / 2, 196), boundaryA = point(start, 156), boundaryB = point(start, 235);
           return <g key={month}>
-            <path d={sectorPath(start, end, 156, 235)} fill={i % 2 ? "#fbfdff" : "#f5f8fc"} />
-            <line x1={boundaryA.x} y1={boundaryA.y} x2={boundaryB.x} y2={boundaryB.y} stroke="#cbd8e8" strokeWidth="1.5" />
+            <path d={sectorPath(start, end, 156, 235)} fill={i % 2 ? "var(--dial-sector-alt)" : "var(--dial-sector)"} />
+            <line x1={boundaryA.x} y1={boundaryA.y} x2={boundaryB.x} y2={boundaryB.y} stroke="var(--dial-grid)" strokeWidth="1.5" />
             <text x={mid.x} y={mid.y + 4} textAnchor="middle" className="month-label">{month}</text>
           </g>;
         })}
         <path d={sectorPath(0, Math.max(nowAngle, 0.5), 84, 150)} fill="#ef4444" opacity="0.12" />
-        <circle cx="300" cy="300" r="156" fill="white" stroke="#d4deea" strokeWidth="2" />
-        <circle cx="300" cy="300" r="83" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.5" />
+        <circle cx="300" cy="300" r="156" fill="var(--dial-inner)" stroke="var(--dial-stroke)" strokeWidth="2" />
+        <circle cx="300" cy="300" r="83" fill="var(--dial-core)" stroke="var(--dial-stroke)" strokeWidth="1.5" />
         {Array.from({ length: 48 }, (_, i) => {
           const angle = (i / 48) * 360, a = point(angle, i % 4 === 0 ? 229 : 232), b = point(angle, 237);
-          return <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#9fb1c7" strokeWidth={i % 4 === 0 ? 1.6 : 0.8} />;
+          return <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="var(--dial-tick)" strokeWidth={i % 4 === 0 ? 1.6 : 0.8} />;
         })}
         {positioned.map((item) => {
           const right = item.side === "right";
@@ -154,10 +155,9 @@ function DeadlineDial({ year, now, items }: { year: number; now: Date; items: De
         <circle cx="300" cy="300" r="14" fill="#fff1f2" stroke="white" strokeWidth="4" filter="url(#soft-shadow)" />
         <circle cx="300" cy="300" r="9" fill="url(#hub-gradient)" stroke="#be123c" strokeWidth="1.5" />
         <circle cx="300" cy="300" r="2.5" fill="white" />
-        <text x="300" y="268" textAnchor="middle" className="today-kicker">TODAY</text>
-        <text x="300" y="300" textAnchor="middle" className="today-date">{formatDate(now)}</text>
-        <text x="300" y="325" textAnchor="middle" className="today-time">{now.toLocaleTimeString("en-GB")}</text>
-        <text x="300" y="346" textAnchor="middle" className="today-meta">{items.length} DEADLINES · {year}</text>
+        <text x="300" y="244" textAnchor="middle" className="today-date">{formatDate(now)}</text>
+        <text x="300" y="266" textAnchor="middle" className="today-time">{now.toLocaleTimeString("en-GB")}</text>
+        <text x="300" y="347" textAnchor="middle" className="today-meta">{items.length} DEADLINES · {year}</text>
       </svg>
     </div>
   );
@@ -190,8 +190,7 @@ export default function Home() {
       note: item.deadline_status === "estimated" ? "Estimated from previous year" : item.deadline_status === "manual" ? "Manual override" : item.source_name ?? undefined,
       sourceStatus: item.deadline_status,
     }));
-    const keys = new Set(custom.map((item) => `${item.name.toLowerCase()}-${item.date}`));
-    return [...deadlines.filter((item) => !keys.has(`${item.name.toLowerCase()}-${item.date}`)), ...custom];
+    return managed.length ? custom : deadlines;
   }, [managed]);
   const yearItems = useMemo(() => allDeadlines.filter((item) => Number(item.date.slice(0, 4)) === year), [allDeadlines, year]);
   const sorted = useMemo(() => [...yearItems].sort((a, b) => a.date.localeCompare(b.date)), [yearItems]);
@@ -200,6 +199,7 @@ export default function Home() {
     <header className="topbar">
       <div><div className="eyebrow"><span className="live-dot" /> RESEARCH PLANNER</div><h1>Deadline Clock</h1><p>Conference deadlines, mapped across the year.</p></div>
       <div className="toolbar">
+        <ThemeToggle />
         <Link className="settings-link" href="/settings"><Settings2 size={17} /> Manage</Link>
         <div className="live-time"><Clock3 size={17} /> {now.toLocaleTimeString("en-GB")} <span /> {formatDate(now)}</div>
         <label className="year-select"><span>YEAR</span><select value={year} onChange={(e) => setYear(Number(e.target.value))} aria-label="Select year">{[2024, 2025, 2026, 2027].map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
