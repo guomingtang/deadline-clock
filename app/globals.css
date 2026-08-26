@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+:root { --ink: #111827; --muted: #64748b; --line: #dce5f0; --paper: #f3f6fa; --blue: #2563eb; }
+* { box-sizing: border-box; }
+html { background: var(--paper); }
+body {
+  margin: 0; color: var(--ink);
+  background: radial-gradient(circle at 12% 0%, rgba(219, 234, 254, .75), transparent 27rem), var(--paper);
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+button, select { font: inherit; }
+.app-shell { min-height: 100vh; padding: 30px 38px 44px; }
+.topbar { max-width: 1440px; margin: 0 auto 24px; padding: 0 4px 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; border-bottom: 1px solid var(--line); }
+.eyebrow { display: flex; align-items: center; gap: 8px; color: var(--blue); font-size: 11px; font-weight: 800; letter-spacing: .16em; }
+.live-dot { width: 7px; height: 7px; border-radius: 999px; background: #22c55e; box-shadow: 0 0 0 5px rgba(34, 197, 94, .12); }
+.topbar h1 { margin: 7px 0 2px; font-size: clamp(30px, 4vw, 44px); line-height: 1; letter-spacing: -.045em; }
+.topbar p { margin: 8px 0 0; color: var(--muted); font-size: 15px; }
+.toolbar { display: flex; align-items: center; gap: 12px; }
+.live-time { height: 48px; display: flex; align-items: center; gap: 9px; padding: 0 17px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.72); color: #475569; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.live-time span { width: 1px; height: 18px; background: var(--line); }
+.year-select { height: 48px; display: flex; align-items: center; gap: 9px; padding: 0 10px 0 14px; border-radius: 14px; background: var(--ink); color: white; }
+.year-select > span { font-size: 9px; letter-spacing: .14em; color: #94a3b8; font-weight: 800; }
+.year-select select { appearance: none; border: 0; outline: 0; color: white; background: transparent; font-weight: 700; cursor: pointer; padding: 4px; }
+.year-select option { color: var(--ink); }
+.workspace { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(340px, .75fr); gap: 18px; }
+.dial-panel, .deadline-panel { background: rgba(255,255,255,.88); border: 1px solid #e1e8f0; box-shadow: 0 10px 35px rgba(15, 23, 42, .05); }
+.dial-panel { min-width: 0; border-radius: 24px 8px 8px 24px; padding: 24px 26px 18px; }
+.deadline-panel { border-radius: 8px 24px 24px 8px; overflow: hidden; display: flex; flex-direction: column; max-height: 790px; }
+.panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 18px; }
+.panel-heading > div { display: flex; align-items: center; gap: 12px; }
+.panel-heading h2 { margin: 0; font-size: 17px; letter-spacing: -.02em; }
+.panel-heading p { margin: 0; color: #94a3b8; font-size: 12px; }
+.section-number { color: var(--blue); font-size: 10px; font-weight: 900; letter-spacing: .12em; }
+.dial-wrap { width: min(100%, 680px); aspect-ratio: 1; margin: 0 auto; }
+.dial { width: 100%; height: 100%; overflow: visible; }
+.month-label { font-size: 10px; font-weight: 800; fill: #64748b; letter-spacing: .09em; }
+.deadline-label { font-size: 9px; font-weight: 800; letter-spacing: .02em; paint-order: stroke; stroke: white; stroke-width: 4px; stroke-linejoin: round; }
+.today-kicker { font-size: 9px; font-weight: 900; fill: #ef4444; letter-spacing: .18em; }
+.today-date { font-size: 20px; font-weight: 800; fill: var(--ink); letter-spacing: -.04em; }
+.today-time { font-size: 12px; font-weight: 650; fill: #64748b; font-variant-numeric: tabular-nums; }
+.today-meta { font-size: 8px; font-weight: 750; fill: #94a3b8; letter-spacing: .08em; }
+.legend { margin-top: -8px; display: flex; justify-content: center; gap: 22px; color: #64748b; font-size: 11px; }
+.legend span { display: flex; align-items: center; gap: 7px; }
+.legend i { width: 7px; height: 7px; border-radius: 99px; }
+.legend .red { background: #ef4444; } .legend .blue { background: #2563eb; }
+.list-heading { padding: 24px 22px 17px; border-bottom: 1px solid #edf1f5; }
+.count-badge { min-width: 28px; height: 24px; padding: 0 8px; display: grid; place-items: center; border-radius: 99px; color: var(--blue); background: #eff6ff; font-size: 11px; font-weight: 800; }
+.deadline-list { padding: 7px 10px 10px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+.deadline-row { position: relative; display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 11px 9px; border-bottom: 1px solid #eef2f6; }
+.deadline-row:last-child { border-bottom: 0; }
+.deadline-row:hover { background: #f8fafc; border-radius: 12px; }
+.date-tile { overflow: hidden; border: 1px solid #e2e8f0; border-radius: 9px; background: white; text-align: center; }
+.date-tile span { display: block; padding: 3px 2px; color: white; background: var(--accent); font-size: 8px; font-weight: 900; letter-spacing: .09em; }
+.date-tile strong { display: block; padding: 3px 2px 5px; font-size: 16px; line-height: 1; }
+.deadline-copy { min-width: 0; }
+.deadline-copy h3 { margin: 0 0 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+.deadline-copy p { margin: 0; color: #94a3b8; font-size: 10px; line-height: 1.35; }
+.status { padding: 5px 7px; border-radius: 7px; background: #eff6ff; color: #2563eb; font-size: 9px; font-weight: 850; letter-spacing: .05em; }
+.status.past { background: #f1f5f9; color: #94a3b8; }
+.source-note { margin: auto 20px 0; padding: 15px 0 18px; border-top: 1px solid #edf1f5; color: #94a3b8; font-size: 10px; line-height: 1.45; }
+.empty-state { min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; color: #94a3b8; }
+.empty-state strong { color: #475569; }
+@media (max-width: 980px) {
+  .app-shell { padding: 22px 18px 32px; }
+  .workspace { grid-template-columns: 1fr; }
+  .dial-panel, .deadline-panel { border-radius: 20px; }
+  .deadline-panel { max-height: none; }
+}
+@media (max-width: 640px) {
+  .topbar { align-items: stretch; flex-direction: column; }
+  .toolbar { display: grid; grid-template-columns: 1fr auto; }
+  .live-time { overflow: hidden; font-size: 12px; padding: 0 12px; }
+  .live-time span { display: none; }
+  .dial-panel { padding: 20px 8px 16px; }
+  .panel-heading { padding-inline: 10px; }
+  .panel-heading p { display: none; }
+  .deadline-label { font-size: 7.5px; }
+  .month-label { font-size: 8px; }
+  .legend { margin-top: -2px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .live-dot { animation: pulse 2.2s ease-out infinite; }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(34,197,94,.12); } 50% { box-shadow: 0 0 0 7px rgba(34,197,94,.02); } }
+}
