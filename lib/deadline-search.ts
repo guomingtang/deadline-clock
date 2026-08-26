@@ -4,6 +4,7 @@ export type ResolvedDeadline = {
   timezone: string | null;
   sourceName: string | null;
   sourceUrl: string | null;
+  conferenceUrl: string | null;
   deadlineStatus: "sourced" | "estimated" | "pending";
   lastCheckedAt: string;
 };
@@ -80,6 +81,7 @@ function parseYaml(yaml: string, targetYear: number, sourceUrl: string): Resolve
   const deadlines = extractDates(yaml, "deadline");
   const abstracts = extractDates(yaml, "abstract_deadline");
   const timezone = yaml.match(/^\s*timezone:\s*["']?([^\n"']+)/im)?.[1]?.trim() ?? null;
+  const conferenceUrl = [...yaml.matchAll(/^\s*link:\s*["']?(https?:\/\/[^\n"']+)/gim)].at(-1)?.[1]?.trim() ?? null;
   const exact = deadlines.filter((item) => Number(item.date.slice(0, 4)) === targetYear).at(-1);
   const exactAbstract = abstracts.filter((item) => Number(item.date.slice(0, 4)) === targetYear).at(-1);
   const checked = new Date().toISOString();
@@ -91,6 +93,7 @@ function parseYaml(yaml: string, targetYear: number, sourceUrl: string): Resolve
       timezone,
       sourceName: "CCF-Deadlines",
       sourceUrl,
+      conferenceUrl,
       deadlineStatus: "sourced",
       lastCheckedAt: checked,
     };
@@ -105,6 +108,7 @@ function parseYaml(yaml: string, targetYear: number, sourceUrl: string): Resolve
       timezone,
       sourceName: "CCF-Deadlines (previous year)",
       sourceUrl,
+      conferenceUrl,
       deadlineStatus: "estimated",
       lastCheckedAt: checked,
     };
@@ -134,6 +138,7 @@ export async function resolveConferenceDeadline(name: string, field: string, tar
     timezone: null,
     sourceName: null,
     sourceUrl: null,
+    conferenceUrl: null,
     deadlineStatus: "pending",
     lastCheckedAt: checked,
   };
