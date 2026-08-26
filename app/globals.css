@@ -34,7 +34,8 @@ button, select { font: inherit; }
 .dial-wrap { width: min(100%, 680px); aspect-ratio: 1; margin: 0 auto; }
 .dial { width: 100%; height: 100%; overflow: visible; }
 .month-label { font-size: 10px; font-weight: 800; fill: #64748b; letter-spacing: .09em; }
-.deadline-label { font-size: 9px; font-weight: 800; letter-spacing: .02em; paint-order: stroke; stroke: white; stroke-width: 4px; stroke-linejoin: round; }
+.deadline-label-box { fill: rgba(255,255,255,.96); stroke-width: 1px; filter: drop-shadow(0 2px 3px rgba(15,23,42,.10)); }
+.deadline-label { font-size: 9px; font-weight: 850; letter-spacing: .025em; }
 .today-kicker { font-size: 9px; font-weight: 900; fill: #ef4444; letter-spacing: .18em; }
 .today-date { font-size: 20px; font-weight: 800; fill: var(--ink); letter-spacing: -.04em; }
 .today-time { font-size: 12px; font-weight: 650; fill: #64748b; font-variant-numeric: tabular-nums; }
@@ -80,5 +81,7 @@ button, select { font: inherit; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .live-dot { animation: pulse 2.2s ease-out infinite; }
+  .needle-pulse { transform-box: fill-box; transform-origin: center; animation: needle-pulse 2.1s ease-out infinite; }
   @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(34,197,94,.12); } 50% { box-shadow: 0 0 0 7px rgba(34,197,94,.02); } }
+  @keyframes needle-pulse { 0%, 100% { transform: scale(.82); opacity: .42; } 55% { transform: scale(1.28); opacity: .08; } }
 }
