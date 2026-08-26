@@ -10,6 +10,7 @@ export const conferences = sqliteTable("conferences", {
   timezone: text("timezone"),
   sourceName: text("source_name"),
   sourceUrl: text("source_url"),
+  websiteUrl: text("website_url"),
   deadlineStatus: text("deadline_status").notNull().default("pending"),
   manuallyOverridden: integer("manually_overridden", { mode: "boolean" }).notNull().default(false),
   lastCheckedAt: text("last_checked_at"),
