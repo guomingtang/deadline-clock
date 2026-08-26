@@ -22,8 +22,8 @@ export async function POST(request: Request) {
 
   const resolved = await Promise.all(items.map(async (item) => ({ ...item, ...(await resolveConferenceDeadline(item.name, item.field)) })));
   await env.DB.batch(resolved.map((item) => env.DB.prepare(
-    "INSERT INTO conferences (name, field, deadline, abstract_deadline, timezone, source_name, source_url, deadline_status, manually_overridden, last_checked_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?)"
-  ).bind(item.name, item.field, item.deadline, item.abstractDeadline, item.timezone, item.sourceName, item.sourceUrl, item.deadlineStatus, item.lastCheckedAt)));
+    "INSERT INTO conferences (name, field, deadline, abstract_deadline, timezone, source_name, source_url, website_url, deadline_status, manually_overridden, last_checked_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)"
+  ).bind(item.name, item.field, item.deadline, item.abstractDeadline, item.timezone, item.sourceName, item.sourceUrl, item.conferenceUrl, item.deadlineStatus, item.lastCheckedAt)));
 
   const result = await env.DB.prepare("SELECT * FROM conferences ORDER BY created_at DESC, id DESC").all();
   return Response.json({ conferences: result.results, added: items.length }, { status: 201 });
