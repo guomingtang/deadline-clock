@@ -31,7 +31,7 @@ button, select { font: inherit; }
 .panel-heading h2 { margin: 0; font-size: 17px; letter-spacing: -.02em; }
 .panel-heading p { margin: 0; color: #94a3b8; font-size: 12px; }
 .section-number { color: var(--blue); font-size: 10px; font-weight: 900; letter-spacing: .12em; }
-.dial-wrap { width: min(100%, 680px); aspect-ratio: 1; margin: 0 auto; }
+.dial-wrap { width: min(100%, 780px); aspect-ratio: 780 / 660; margin: 14px auto 4px; }
 .dial { width: 100%; height: 100%; overflow: visible; }
 .month-label { font-size: 10px; font-weight: 800; fill: #64748b; letter-spacing: .09em; }
 .deadline-label-box { fill: rgba(255,255,255,.96); stroke-width: 1px; filter: drop-shadow(0 2px 3px rgba(15,23,42,.10)); }
