@@ -20,7 +20,7 @@ const deadlines: Deadline[] = [
   { name: "ATC", short: "ATC", date: "2026-06-10", color: "#7c3aed" },
   { name: "HotNets", short: "HotNets", date: "2025-07-01", color: "#ea580c" },
   { name: "SoCC", short: "SoCC", date: "2026-07-07", color: "#14b8a6", note: "Round 1; alternative date: Jul 14" },
-  { name: "INFOCOM", short: "INFOCOM", date: "2027-07-31", color: "#3b82f6" },
+  { name: "INFOCOM 2027", short: "INFOCOM", date: "2026-07-31", color: "#3b82f6" },
   { name: "HPCA", short: "HPCA", date: "2025-08-01", color: "#4f46e5" },
   { name: "ASPLOS Fall", short: "ASPLOS F", date: "2026-09-09", color: "#06b6d4" },
   { name: "e-Energy Fall", short: "e-Energy", date: "2025-09-18", color: "#84cc16" },
@@ -50,21 +50,59 @@ function formatDate(date: Date) {
   return new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
 }
 
+function layoutDeadlineLabels(items: Deadline[], total: number) {
+  const raw = items.map((item) => {
+    const date = new Date(`${item.date}T12:00:00`);
+    const angle = (dayOfYear(date) / total) * 360;
+    const marker = point(angle, 230);
+    const elbow = point(angle, 252);
+    return { ...item, angle, marker, elbow, side: marker.x >= 300 ? "right" as const : "left" as const, labelY: elbow.y };
+  });
+
+  const arrange = (side: "left" | "right") => {
+    const group = raw.filter((item) => item.side === side).sort((a, b) => a.labelY - b.labelY);
+    const minY = 38;
+    const maxY = 562;
+    const gap = group.length > 1 ? Math.min(25, (maxY - minY) / (group.length - 1)) : 0;
+    group.forEach((item, index) => {
+      const desired = Math.max(minY, Math.min(maxY, item.labelY));
+      item.labelY = index === 0 ? desired : Math.max(desired, group[index - 1].labelY + gap);
+    });
+    if (group.length && group[group.length - 1].labelY > maxY) {
+      const overflow = group[group.length - 1].labelY - maxY;
+      group.forEach((item) => { item.labelY -= overflow; });
+    }
+    if (group.length && group[0].labelY < minY) {
+      const shift = minY - group[0].labelY;
+      group.forEach((item) => { item.labelY += shift; });
+    }
+    return group;
+  };
+
+  return [...arrange("left"), ...arrange("right")];
+}
+
 function DeadlineDial({ year, now, items }: { year: number; now: Date; items: Deadline[] }) {
   const total = daysInYear(year);
   const nowAngle = now.getFullYear() === year ? (dayOfYear(now) / total) * 360 : now.getFullYear() > year ? 360 : 0;
-  const currentPoint = point(nowAngle, 198);
-  const positioned = items.map((item, index) => {
-    const date = new Date(`${item.date}T12:00:00`);
-    const angle = (dayOfYear(date) / total) * 360;
-    return { ...item, marker: point(angle, 230), elbow: point(angle, 255 + (index % 3) * 9), label: point(angle, 274 + (index % 3) * 13) };
-  });
+  const currentPoint = point(nowAngle, 214);
+  const needleTail = point(nowAngle + 180, 27);
+  const ux = (currentPoint.x - 300) / 214;
+  const uy = (currentPoint.y - 300) / 214;
+  const headBase = { x: currentPoint.x - ux * 20, y: currentPoint.y - uy * 20 };
+  const arrowPoints = `${currentPoint.x},${currentPoint.y} ${headBase.x - uy * 8},${headBase.y + ux * 8} ${headBase.x + uy * 8},${headBase.y - ux * 8}`;
+  const positioned = layoutDeadlineLabels(items, total);
 
   return (
     <div className="dial-wrap" aria-label={`Deadline clock for ${year}`}>
       <svg className="dial" viewBox="0 0 600 600" role="img">
         <title>{year} conference deadline dial</title>
-        <defs><filter id="soft-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="8" stdDeviation="12" floodColor="#0f172a" floodOpacity="0.12" /></filter></defs>
+        <defs>
+          <filter id="soft-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="8" stdDeviation="12" floodColor="#0f172a" floodOpacity="0.12" /></filter>
+          <filter id="needle-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+          <linearGradient id="needle-gradient" gradientUnits="userSpaceOnUse" x1="300" y1="300" x2={currentPoint.x} y2={currentPoint.y}><stop offset="0" stopColor="#fb7185" /><stop offset="0.55" stopColor="#ef4444" /><stop offset="1" stopColor="#be123c" /></linearGradient>
+          <radialGradient id="hub-gradient"><stop offset="0" stopColor="#ffffff" /><stop offset="0.55" stopColor="#fecdd3" /><stop offset="1" stopColor="#e11d48" /></radialGradient>
+        </defs>
         <circle cx="300" cy="300" r="235" fill="#f8fafc" stroke="#dbe5f1" strokeWidth="2" filter="url(#soft-shadow)" />
         {months.map((month, i) => {
           const start = (i / 12) * 360, end = ((i + 1) / 12) * 360;
@@ -83,16 +121,27 @@ function DeadlineDial({ year, now, items }: { year: number; now: Date; items: De
           return <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#9fb1c7" strokeWidth={i % 4 === 0 ? 1.6 : 0.8} />;
         })}
         {positioned.map((item) => {
-          const right = item.label.x >= 300, endX = item.label.x + (right ? 10 : -10);
+          const right = item.side === "right";
+          const labelX = right ? 526 : 74;
+          const lineEndX = right ? labelX - 11 : labelX + 11;
+          const textWidth = item.short.length * 6.1;
+          const boxX = right ? labelX - 8 : labelX - textWidth - 8;
           return <g key={`${item.name}-${item.date}`}>
-            <path d={`M ${item.marker.x} ${item.marker.y} L ${item.elbow.x} ${item.elbow.y} L ${endX} ${item.label.y}`} fill="none" stroke={item.color} strokeWidth="1.15" strokeDasharray="2.5 2.5" opacity="0.7" />
+            <path d={`M ${item.marker.x} ${item.marker.y} L ${item.elbow.x} ${item.elbow.y} L ${lineEndX} ${item.labelY}`} fill="none" stroke={item.color} strokeWidth="1.15" strokeDasharray="2.5 2.5" opacity="0.62" />
             <circle cx={item.marker.x} cy={item.marker.y} r="7" fill={item.color} stroke="white" strokeWidth="3" />
-            <text x={item.label.x} y={item.label.y + 3} textAnchor={right ? "start" : "end"} className="deadline-label" fill={item.color}>{item.short}</text>
+            <rect x={boxX} y={item.labelY - 10} width={textWidth + 16} height="20" rx="6" className="deadline-label-box" stroke={item.color} />
+            <text x={labelX} y={item.labelY + 3.2} textAnchor={right ? "start" : "end"} className="deadline-label" fill={item.color}>{item.short}</text>
           </g>;
         })}
-        <line x1="300" y1="300" x2={currentPoint.x} y2={currentPoint.y} stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
-        <circle cx={currentPoint.x} cy={currentPoint.y} r="5" fill="#ef4444" stroke="white" strokeWidth="2" />
-        <circle cx="300" cy="300" r="6" fill="#ef4444" stroke="white" strokeWidth="3" />
+        <line x1={needleTail.x} y1={needleTail.y} x2={currentPoint.x} y2={currentPoint.y} stroke="#fb7185" strokeWidth="13" strokeLinecap="round" opacity="0.16" filter="url(#needle-glow)" />
+        <line x1={needleTail.x} y1={needleTail.y} x2={currentPoint.x} y2={currentPoint.y} stroke="url(#needle-gradient)" strokeWidth="5.5" strokeLinecap="round" />
+        <line x1={needleTail.x} y1={needleTail.y} x2={currentPoint.x} y2={currentPoint.y} stroke="white" strokeWidth="1.1" strokeLinecap="round" opacity="0.72" />
+        <polygon points={arrowPoints} fill="#be123c" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
+        <circle cx={currentPoint.x} cy={currentPoint.y} r="12" fill="none" stroke="#fb7185" strokeWidth="2" opacity="0.32" className="needle-pulse" />
+        <circle cx={currentPoint.x} cy={currentPoint.y} r="4.5" fill="#be123c" stroke="white" strokeWidth="2" />
+        <circle cx="300" cy="300" r="14" fill="#fff1f2" stroke="white" strokeWidth="4" filter="url(#soft-shadow)" />
+        <circle cx="300" cy="300" r="9" fill="url(#hub-gradient)" stroke="#be123c" strokeWidth="1.5" />
+        <circle cx="300" cy="300" r="2.5" fill="white" />
         <text x="300" y="268" textAnchor="middle" className="today-kicker">TODAY</text>
         <text x="300" y="300" textAnchor="middle" className="today-date">{formatDate(now)}</text>
         <text x="300" y="325" textAnchor="middle" className="today-time">{now.toLocaleTimeString("en-GB")}</text>
