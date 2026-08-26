@@ -1,9 +1,11 @@
 "use client";
 
-import { CalendarDays, Clock3 } from "lucide-react";
+import { CalendarDays, Clock3, Settings2 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-type Deadline = { name: string; short: string; date: string; color: string; note?: string };
+type Deadline = { name: string; short: string; date: string; color: string; note?: string; sourceStatus?: string };
+type ManagedConference = { id: number; name: string; deadline: string | null; deadline_status: string; source_name: string | null };
 
 const deadlines: Deadline[] = [
   { name: "ICDCS", short: "ICDCS", date: "2026-01-14", color: "#2563eb" },
@@ -31,6 +33,12 @@ const deadlines: Deadline[] = [
 ];
 
 const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+const dynamicColors = ["#2563eb", "#7c3aed", "#0891b2", "#059669", "#db2777", "#ea580c", "#4f46e5"];
+
+function shortName(name: string) {
+  const compact = name.replace(/\b20\d{2}\b/g, "").trim();
+  return compact.length > 12 ? `${compact.slice(0, 11)}…` : compact;
+}
 
 function daysInYear(year: number) { return new Date(year, 1, 29).getMonth() === 1 ? 366 : 365; }
 function dayOfYear(date: Date) {
@@ -158,14 +166,41 @@ function DeadlineDial({ year, now, items }: { year: number; now: Date; items: De
 export default function Home() {
   const [now, setNow] = useState(() => new Date());
   const [year, setYear] = useState(2026);
+  const [managed, setManaged] = useState<ManagedConference[]>([]);
   useEffect(() => { const timer = window.setInterval(() => setNow(new Date()), 1000); return () => window.clearInterval(timer); }, []);
-  const yearItems = useMemo(() => deadlines.filter((item) => Number(item.date.slice(0, 4)) === year), [year]);
+  useEffect(() => {
+    async function load() {
+      const autoRefresh = localStorage.getItem("deadline-clock:auto-refresh") !== "false";
+      const lastRefresh = Date.parse(localStorage.getItem("deadline-clock:last-refresh") ?? "");
+      if (autoRefresh && (!Number.isFinite(lastRefresh) || Date.now() - lastRefresh > 86400000)) {
+        await fetch("/api/conferences/refresh", { method: "POST" }).catch(() => null);
+        localStorage.setItem("deadline-clock:last-refresh", new Date().toISOString());
+      }
+      const response = await fetch("/api/conferences", { cache: "no-store" });
+      if (response.ok) setManaged(((await response.json()) as { conferences: ManagedConference[] }).conferences);
+    }
+    load().catch(() => null);
+  }, []);
+  const allDeadlines = useMemo(() => {
+    const custom = managed.filter((item) => item.deadline).map((item, index) => ({
+      name: item.name,
+      short: shortName(item.name),
+      date: item.deadline as string,
+      color: dynamicColors[index % dynamicColors.length],
+      note: item.deadline_status === "estimated" ? "Estimated from previous year" : item.deadline_status === "manual" ? "Manual override" : item.source_name ?? undefined,
+      sourceStatus: item.deadline_status,
+    }));
+    const keys = new Set(custom.map((item) => `${item.name.toLowerCase()}-${item.date}`));
+    return [...deadlines.filter((item) => !keys.has(`${item.name.toLowerCase()}-${item.date}`)), ...custom];
+  }, [managed]);
+  const yearItems = useMemo(() => allDeadlines.filter((item) => Number(item.date.slice(0, 4)) === year), [allDeadlines, year]);
   const sorted = useMemo(() => [...yearItems].sort((a, b) => a.date.localeCompare(b.date)), [yearItems]);
 
   return <main className="app-shell">
     <header className="topbar">
       <div><div className="eyebrow"><span className="live-dot" /> RESEARCH PLANNER</div><h1>Deadline Clock</h1><p>Conference deadlines, mapped across the year.</p></div>
       <div className="toolbar">
+        <Link className="settings-link" href="/settings"><Settings2 size={17} /> Manage</Link>
         <div className="live-time"><Clock3 size={17} /> {now.toLocaleTimeString("en-GB")} <span /> {formatDate(now)}</div>
         <label className="year-select"><span>YEAR</span><select value={year} onChange={(e) => setYear(Number(e.target.value))} aria-label="Select year">{[2024, 2025, 2026, 2027].map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
       </div>
