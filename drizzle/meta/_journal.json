@@ -15,6 +15,13 @@
       "when": 1787734700000,
       "tag": "0001_seed_conferences",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1787735827471,
+      "tag": "0002_sleepy_thunderbolt_ross",
+      "breakpoints": true
     }
   ]
 }
