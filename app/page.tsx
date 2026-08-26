@@ -56,7 +56,7 @@ function layoutDeadlineLabels(items: Deadline[], total: number) {
     const angle = (dayOfYear(date) / total) * 360;
     const marker = point(angle, 230);
     const elbow = point(angle, 252);
-    return { ...item, angle, marker, elbow, side: marker.x >= 300 ? "right" as const : "left" as const, labelY: elbow.y };
+    return { ...item, angle, marker, elbow, side: marker.x >= 300 ? "right" as const : "left" as const, labelY: elbow.y, lane: 0 };
   });
 
   const arrange = (side: "left" | "right") => {
@@ -76,6 +76,7 @@ function layoutDeadlineLabels(items: Deadline[], total: number) {
       const shift = minY - group[0].labelY;
       group.forEach((item) => { item.labelY += shift; });
     }
+    group.forEach((item, index) => { item.lane = index % 2; });
     return group;
   };
 
@@ -95,7 +96,7 @@ function DeadlineDial({ year, now, items }: { year: number; now: Date; items: De
 
   return (
     <div className="dial-wrap" aria-label={`Deadline clock for ${year}`}>
-      <svg className="dial" viewBox="0 0 600 600" role="img">
+      <svg className="dial" viewBox="-90 -30 780 660" role="img">
         <title>{year} conference deadline dial</title>
         <defs>
           <filter id="soft-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="8" stdDeviation="12" floodColor="#0f172a" floodOpacity="0.12" /></filter>
@@ -122,7 +123,10 @@ function DeadlineDial({ year, now, items }: { year: number; now: Date; items: De
         })}
         {positioned.map((item) => {
           const right = item.side === "right";
-          const labelX = right ? 526 : 74;
+          const radialY = item.labelY - 300;
+          const contourX = Math.sqrt(Math.max(0, 266 * 266 - radialY * radialY));
+          const outwardOffset = 18 + item.lane * 13;
+          const labelX = right ? 300 + contourX + outwardOffset : 300 - contourX - outwardOffset;
           const lineEndX = right ? labelX - 11 : labelX + 11;
           const textWidth = item.short.length * 6.1;
           const boxX = right ? labelX - 8 : labelX - textWidth - 8;
