@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ArrowLeft, FileUp, Link2, Plus, RefreshCw, Save, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type Conference = {
   id: number;
@@ -95,13 +96,16 @@ export default function SettingsPage() {
     finally { setBusy(false); }
   }
 
-  async function saveManual(item: Conference, deadline: string) {
-    if (!deadline) return;
+  async function saveManual(item: Conference) {
+    const editedName = (document.getElementById(`name-${item.id}`) as HTMLInputElement)?.value.trim();
+    const editedField = (document.getElementById(`field-${item.id}`) as HTMLInputElement)?.value.trim();
+    const deadline = (document.getElementById(`deadline-${item.id}`) as HTMLInputElement)?.value;
+    if (!editedName || !editedField || !deadline) { setMessage("Name, research field, and deadline are required."); return; }
     setBusy(true);
     try {
-      const response = await fetch(`/api/conferences/${item.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ deadline, abstractDeadline: item.abstract_deadline }) });
+      const response = await fetch(`/api/conferences/${item.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: editedName, field: editedField, deadline, abstractDeadline: item.abstract_deadline }) });
       if (!response.ok) throw new Error("Could not save the deadline.");
-      await load(); setMessage(`${item.name} is now manually locked.`);
+      await load(); setMessage(`${editedName} was updated and manually locked.`);
     } catch (error) { setMessage(error instanceof Error ? error.message : "Save failed."); }
     finally { setBusy(false); }
   }
@@ -121,7 +125,7 @@ export default function SettingsPage() {
         <h1>Conference settings</h1>
         <p>Add only a name and research field. Deadline Clock searches and maintains the deadline metadata.</p>
       </div>
-      <Button onClick={refreshAll} disabled={busy}><RefreshCw className={busy ? "spin" : ""} /> Refresh deadlines</Button>
+      <div className="settings-actions"><ThemeToggle /><Button onClick={refreshAll} disabled={busy}><RefreshCw className={busy ? "spin" : ""} /> Refresh deadlines</Button></div>
     </header>
 
     <section className="settings-grid">
@@ -155,8 +159,8 @@ export default function SettingsPage() {
         <TableHeader><TableRow><TableHead>Conference</TableHead><TableHead>Field</TableHead><TableHead>Deadline</TableHead><TableHead>Source & status</TableHead><TableHead className="action-head">Actions</TableHead></TableRow></TableHeader>
         <TableBody>
           {conferences.map((item) => <TableRow key={item.id}>
-            <TableCell><strong>{item.name}</strong></TableCell>
-            <TableCell className="field-cell">{item.field}</TableCell>
+            <TableCell><Input className="conference-input name-input" defaultValue={item.name} id={`name-${item.id}`} aria-label={`Conference name for ${item.name}`} /></TableCell>
+            <TableCell className="field-cell"><Input className="conference-input field-input" defaultValue={item.field} id={`field-${item.id}`} aria-label={`Research field for ${item.name}`} /></TableCell>
             <TableCell><Input className="deadline-input" type="date" defaultValue={item.deadline ?? ""} id={`deadline-${item.id}`} /></TableCell>
             <TableCell>
               <span className={`source-status ${item.deadline_status}`}>{item.deadline_status}</span>
@@ -164,7 +168,7 @@ export default function SettingsPage() {
               {item.last_checked_at && <small>Checked {new Date(item.last_checked_at).toLocaleDateString()}</small>}
             </TableCell>
             <TableCell><div className="row-actions">
-              <Button size="icon-sm" variant="outline" title="Save manual deadline" onClick={() => saveManual(item, (document.getElementById(`deadline-${item.id}`) as HTMLInputElement)?.value)} disabled={busy}><Save /></Button>
+              <Button size="icon-sm" variant="outline" title="Save conference changes" onClick={() => saveManual(item)} disabled={busy}><Save /></Button>
               <Button size="icon-sm" variant="ghost" title="Remove conference" onClick={() => remove(item)} disabled={busy}><Trash2 /></Button>
             </div></TableCell>
           </TableRow>)}
