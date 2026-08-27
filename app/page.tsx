@@ -9,55 +9,55 @@ type Deadline = { name: string; short: string; date: string; color: string; note
 type ManagedConference = { id: number; name: string; deadline: string | null; deadline_status: string; source_name: string | null; source_url: string | null; website_url: string | null };
 
 const deadlines: Deadline[] = [
-  { name: "ICDCS", short: "ICDCS", date: "2026-01-14", color: "#2563eb" },
-  { name: "e-Energy Spring", short: "e-Energy", date: "2026-01-29", color: "#65a30d" },
-  { name: "BuildSys", short: "BuildSys", date: "2026-01-29", color: "#64748b" },
+  { name: "ICDCS 2026", short: "ICDCS", date: "2026-01-21", color: "#2563eb" },
+  { name: "e-Energy 2026 — Winter", short: "e-Energy", date: "2026-01-29", color: "#65a30d" },
+  { name: "BuildSys 2026", short: "BuildSys", date: "2026-01-29", color: "#64748b" },
   { name: "SIGCOMM 2026", short: "SIGCOMM", date: "2026-02-06", color: "#dc2626" },
-  { name: "SC", short: "SC", date: "2025-04-14", color: "#8b5cf6" },
-  { name: "ASPLOS Spring", short: "ASPLOS S", date: "2026-04-15", color: "#0ea5e9" },
-  { name: "NSDI Spring", short: "NSDI S", date: "2026-04-24", color: "#059669" },
-  { name: "SmartGridComm", short: "SGComm", date: "2026-04-26", color: "#0891b2" },
-  { name: "NeurIPS", short: "NeurIPS", date: "2026-05-06", color: "#9333ea" },
-  { name: "EuroSys Spring", short: "EuroSys S", date: "2026-05-15", color: "#475569" },
-  { name: "HotCarbon", short: "HotCarbon", date: "2026-05-18", color: "#f97316" },
-  { name: "ATC", short: "ATC", date: "2026-06-10", color: "#7c3aed" },
-  { name: "HotNets", short: "HotNets", date: "2025-07-01", color: "#ea580c" },
-  { name: "SoCC", short: "SoCC", date: "2026-07-07", color: "#14b8a6", note: "Round 1; alternative date: Jul 14" },
+  { name: "SC26", short: "SC26", date: "2026-04-08", color: "#8b5cf6" },
+  { name: "ASPLOS 2027 — April", short: "ASPLOS Apr", date: "2026-04-15", color: "#0ea5e9" },
+  { name: "NSDI 2027 — Spring", short: "NSDI Spring", date: "2026-04-23", color: "#059669" },
+  { name: "SmartGridComm 2026", short: "SGComm", date: "2026-05-03", color: "#0891b2" },
+  { name: "NeurIPS 2026", short: "NeurIPS", date: "2026-05-06", color: "#9333ea" },
+  { name: "EuroSys 2027 — Spring", short: "EuroSys S", date: "2026-05-14", color: "#475569" },
+  { name: "HotCarbon 2026", short: "HotCarbon", date: "2026-05-18", color: "#f97316" },
+  { name: "ATC 2026", short: "ATC", date: "2026-06-10", color: "#7c3aed" },
+  { name: "SoCC 2026 — Round 2", short: "SoCC R2", date: "2026-07-14", color: "#14b8a6" },
+  { name: "HotNets 2026", short: "HotNets", date: "2026-07-16", color: "#ea580c" },
+  { name: "HPCA 2027", short: "HPCA", date: "2026-07-31", color: "#4f46e5" },
   { name: "INFOCOM 2027", short: "INFOCOM", date: "2026-07-31", color: "#3b82f6" },
-  { name: "HPCA", short: "HPCA", date: "2025-08-01", color: "#4f46e5" },
-  { name: "ASPLOS Fall", short: "ASPLOS F", date: "2026-09-09", color: "#06b6d4" },
-  { name: "e-Energy Fall", short: "e-Energy", date: "2025-09-18", color: "#84cc16" },
-  { name: "NSDI Fall", short: "NSDI F", date: "2026-09-18", color: "#10b981" },
-  { name: "EuroSys Fall", short: "EuroSys F", date: "2026-09-25", color: "#64748b" },
-  { name: "MLSys", short: "MLSys", date: "2025-10-30", color: "#111827" },
-  { name: "ISCA", short: "ISCA", date: "2024-11-22", color: "#8b5cf6" },
+  { name: "ASPLOS 2027 — September", short: "ASPLOS Sep", date: "2026-09-09", color: "#06b6d4" },
+  { name: "NSDI 2027 — Fall", short: "NSDI Fall", date: "2026-09-17", color: "#10b981" },
+  { name: "e-Energy 2027 — Fall", short: "e-Energy", date: "2026-09-18", color: "#84cc16", note: "Estimated from previous official CFP" },
+  { name: "EuroSys 2027 — Fall", short: "EuroSys F", date: "2026-09-24", color: "#64748b" },
+  { name: "MLSys 2027", short: "MLSys", date: "2026-10-30", color: "#111827" },
+  { name: "ISCA 2027", short: "ISCA", date: "2026-11-17", color: "#8b5cf6", note: "Estimated from previous official CFP" },
 ];
 
 const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 const dynamicColors = ["#4f6b8f", "#6f628f", "#3f7481", "#4f7b69", "#94647a", "#9a704e", "#59658c"];
 const conferenceSites: Record<string, string> = {
-  "ICDCS": "https://icdcs2026.icdcs.org/",
-  "e-Energy Spring": "https://energy.acm.org/conferences/eenergy/",
-  "e-Energy Fall": "https://energy.acm.org/conferences/eenergy/",
-  "BuildSys": "https://buildsys.acm.org/2026/",
+  "ICDCS 2026": "https://icdcs2026.icdcs.org/",
+  "e-Energy 2026 — Winter": "https://energy.acm.org/conferences/eenergy/2026/",
+  "e-Energy 2027 — Fall": "https://energy.acm.org/conferences/eenergy/",
+  "BuildSys 2026": "https://buildsys.acm.org/2026/",
   "SIGCOMM 2026": "https://conferences.sigcomm.org/sigcomm/2026/",
-  "SC": "https://supercomputing.org/",
-  "ASPLOS Spring": "https://www.asplos-conference.org/asplos2026/",
-  "ASPLOS Fall": "https://www.asplos-conference.org/asplos2026/",
-  "NSDI Spring": "https://www.usenix.org/conference/nsdi26",
-  "NSDI Fall": "https://www.usenix.org/conference/nsdi26",
-  "SmartGridComm": "https://www.comsoc.org/conferences-events/ieee-international-conference-communications-control-and-computing-7",
-  "NeurIPS": "https://neurips.cc/",
-  "EuroSys Spring": "https://2026.eurosys.org/",
-  "EuroSys Fall": "https://2026.eurosys.org/",
-  "HotCarbon": "https://hotcarbon.org/",
-  "ATC": "https://www.usenix.org/conference/atc26",
-  "HotNets": "https://conferences.sigcomm.org/hotnets/2025/",
-  "SoCC": "https://acmsocc.org/",
+  "SC26": "https://sc26.supercomputing.org/",
+  "ASPLOS 2027 — April": "https://www.asplos-conference.org/asplos2027/",
+  "ASPLOS 2027 — September": "https://www.asplos-conference.org/asplos2027/",
+  "NSDI 2027 — Spring": "https://www.usenix.org/conference/nsdi27",
+  "NSDI 2027 — Fall": "https://www.usenix.org/conference/nsdi27",
+  "SmartGridComm 2026": "https://sgc2026.ieee-smartgridcomm.org/",
+  "NeurIPS 2026": "https://neurips.cc/Conferences/2026",
+  "EuroSys 2027 — Spring": "https://2027.eurosys.org/",
+  "EuroSys 2027 — Fall": "https://2027.eurosys.org/",
+  "HotCarbon 2026": "https://hotcarbon.org/",
+  "ATC 2026": "https://www.usenix.org/conference/atc26",
+  "HotNets 2026": "https://conferences.sigcomm.org/hotnets/2026/",
+  "SoCC 2026 — Round 2": "https://acmsocc.org/2026/",
   "INFOCOM 2027": "https://infocom2027.ieee-infocom.org/",
-  "HPCA": "https://hpca-conf.org/",
-  "MLSys": "https://mlsys.org/",
-  "ISCA": "https://iscaconf.org/",
+  "HPCA 2027": "https://conf.researchr.org/home/hpca-2027",
+  "MLSys 2027": "https://mlsys.org/",
+  "ISCA 2027": "https://iscaconf.org/",
 };
 
 function shortName(name: string) {
@@ -250,7 +250,7 @@ export default function Home() {
             </article>;
           }) : <div className="empty-state"><CalendarDays size={30} /><strong>No deadlines</strong><span>Select another year.</span></div>}
         </div>
-        <p className="source-note">Dates transcribed from the supplied reference. Verify dates with the official calls for papers before submission.</p>
+        <p className="source-note">The dial uses full-paper deadlines. Abstract/registration dates are stored separately. Estimated entries are shifted from the previous official CFP and should be rechecked before submission.</p>
       </aside>
     </section>
   </main>;
