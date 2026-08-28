@@ -80,6 +80,7 @@ button, select, input { font: inherit; }
 .deadline-link:hover .deadline-label-box, .deadline-link:focus-visible .deadline-label-box { transform: scale(1.12); transform-box: fill-box; transform-origin: center; stroke-width: 1.6px; filter: drop-shadow(0 4px 7px rgba(15,23,42,.2)); }
 .deadline-link:hover .deadline-label, .deadline-link:focus-visible .deadline-label { font-size: 10px; font-weight: 900; }
 .dial-year { font-size: 32px; font-weight: 850; fill: var(--ink); letter-spacing: -.045em; }
+.dial-copyright { font-size: 8px; font-weight: 750; fill: var(--muted); letter-spacing: .035em; }
 .legend { margin-top: -8px; display: flex; justify-content: center; gap: 22px; color: var(--muted); font-size: 11px; }
 .legend span { display: flex; align-items: center; gap: 7px; }
 .legend i { width: 7px; height: 7px; border-radius: 99px; }
