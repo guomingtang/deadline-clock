@@ -171,6 +171,7 @@ function DeadlineDial({ year, now, items, svgRef }: { year: number; now: Date; i
           </a>;
         })}
         <text x="300" y="254" textAnchor="middle" className="dial-year">{year}</text>
+        <text x="300" y="354" textAnchor="middle" className="dial-copyright">© SusCom Lab, HKUST(GZ)</text>
         <g className="export-hide">
           <line x1={needleTail.x} y1={needleTail.y} x2={currentPoint.x} y2={currentPoint.y} stroke="var(--needle-mid)" strokeWidth="11" strokeLinecap="round" opacity="0.12" filter="url(#needle-glow)" />
           <line x1={needleTail.x} y1={needleTail.y} x2={currentPoint.x} y2={currentPoint.y} stroke="url(#needle-gradient)" strokeWidth="5.5" strokeLinecap="round" />
@@ -238,10 +239,10 @@ export default function Home() {
       yearLabel?.setAttribute("style", "font-size:42px;font-weight:850;letter-spacing:-0.045em");
 
       const rootStyles = getComputedStyle(document.documentElement);
-      const variables = ["paper", "ink", "dial-face", "dial-sector", "dial-sector-alt", "dial-inner", "dial-core", "dial-stroke", "dial-grid", "dial-tick", "surface-solid"];
+      const variables = ["paper", "ink", "muted", "dial-face", "dial-sector", "dial-sector-alt", "dial-inner", "dial-core", "dial-stroke", "dial-grid", "dial-tick", "surface-solid"];
       const cssVariables = variables.map((name) => `--${name}:${rootStyles.getPropertyValue(`--${name}`).trim()};`).join("");
       const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
-      style.textContent = `svg{${cssVariables}}.month-label{font:800 10px Inter,Arial,sans-serif;fill:#64748b;letter-spacing:.09em}.deadline-label-box{fill:var(--surface-solid);stroke-width:1px}.deadline-label{font:850 9px Inter,Arial,sans-serif;letter-spacing:.025em}.dial-year{font-family:Inter,Arial,sans-serif;fill:var(--ink)}`;
+      style.textContent = `svg{${cssVariables}}.month-label{font:800 10px Inter,Arial,sans-serif;fill:#64748b;letter-spacing:.09em}.deadline-label-box{fill:var(--surface-solid);stroke-width:1px}.deadline-label{font:850 9px Inter,Arial,sans-serif;letter-spacing:.025em}.dial-year{font-family:Inter,Arial,sans-serif;fill:var(--ink)}.dial-copyright{font:750 8px Inter,Arial,sans-serif;fill:var(--muted);letter-spacing:.035em}`;
       clone.insertBefore(style, clone.firstChild);
 
       const background = document.createElementNS("http://www.w3.org/2000/svg", "rect");
