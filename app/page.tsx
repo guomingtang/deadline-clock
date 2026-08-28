@@ -1,8 +1,8 @@
 "use client";
 
-import { CalendarDays, Clock3, Settings2 } from "lucide-react";
+import { CalendarDays, Clock3, ImageDown, Settings2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 type Deadline = { name: string; short: string; date: string; color: string; note?: string; sourceStatus?: string; website?: string };
@@ -116,7 +116,7 @@ function layoutDeadlineLabels(items: Deadline[], total: number) {
   return [...arrange("left"), ...arrange("right")];
 }
 
-function DeadlineDial({ year, now, items }: { year: number; now: Date; items: Deadline[] }) {
+function DeadlineDial({ year, now, items, svgRef }: { year: number; now: Date; items: Deadline[]; svgRef: React.RefObject<SVGSVGElement | null> }) {
   const total = daysInYear(year);
   const nowAngle = now.getFullYear() === year ? (dayOfYear(now) / total) * 360 : now.getFullYear() > year ? 360 : 0;
   const currentPoint = point(nowAngle, 214);
@@ -129,7 +129,7 @@ function DeadlineDial({ year, now, items }: { year: number; now: Date; items: De
 
   return (
     <div className="dial-wrap" aria-label={`Deadline clock for ${year}`}>
-      <svg className="dial" viewBox="-90 -30 780 660" role="img">
+      <svg ref={svgRef} className="dial" viewBox="-90 -30 780 660" role="img" xmlns="http://www.w3.org/2000/svg">
         <title>{year} conference deadline dial</title>
         <defs>
           <filter id="soft-shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="8" stdDeviation="12" floodColor="#0f172a" floodOpacity="0.12" /></filter>
@@ -147,7 +147,7 @@ function DeadlineDial({ year, now, items }: { year: number; now: Date; items: De
             <text x={mid.x} y={mid.y + 4} textAnchor="middle" className="month-label">{month}</text>
           </g>;
         })}
-        <path d={sectorPath(0, Math.max(nowAngle, 0.5), 84, 150)} fill="var(--needle-mid)" opacity="0.09" />
+        <path className="export-hide" d={sectorPath(0, Math.max(nowAngle, 0.5), 84, 150)} fill="var(--needle-mid)" opacity="0.09" />
         <circle cx="300" cy="300" r="156" fill="var(--dial-inner)" stroke="var(--dial-stroke)" strokeWidth="2" />
         <circle cx="300" cy="300" r="83" fill="var(--dial-core)" stroke="var(--dial-stroke)" strokeWidth="1.5" />
         {Array.from({ length: 48 }, (_, i) => {
@@ -170,19 +170,18 @@ function DeadlineDial({ year, now, items }: { year: number; now: Date; items: De
             <text x={labelX} y={item.labelY + 3.2} textAnchor={right ? "start" : "end"} className="deadline-label" fill={item.color}>{item.short}</text>
           </a>;
         })}
-        <line x1={needleTail.x} y1={needleTail.y} x2={currentPoint.x} y2={currentPoint.y} stroke="var(--needle-mid)" strokeWidth="11" strokeLinecap="round" opacity="0.12" filter="url(#needle-glow)" />
-        <line x1={needleTail.x} y1={needleTail.y} x2={currentPoint.x} y2={currentPoint.y} stroke="url(#needle-gradient)" strokeWidth="5.5" strokeLinecap="round" />
-        <line x1={needleTail.x} y1={needleTail.y} x2={currentPoint.x} y2={currentPoint.y} stroke="white" strokeWidth="1.1" strokeLinecap="round" opacity="0.72" />
-        <polygon points={arrowPoints} fill="var(--needle-end)" stroke="var(--surface-solid)" strokeWidth="1.5" strokeLinejoin="round" />
-        <circle cx={currentPoint.x} cy={currentPoint.y} r="12" fill="none" stroke="var(--needle-mid)" strokeWidth="2" opacity="0.25" className="needle-pulse" />
-        <circle cx={currentPoint.x} cy={currentPoint.y} r="4.5" fill="var(--needle-end)" stroke="var(--surface-solid)" strokeWidth="2" />
-        <circle cx="300" cy="300" r="14" fill="var(--hub-light)" stroke="var(--surface-solid)" strokeWidth="4" filter="url(#soft-shadow)" />
-        <circle cx="300" cy="300" r="9" fill="url(#hub-gradient)" stroke="var(--needle-end)" strokeWidth="1.5" />
-        <circle cx="300" cy="300" r="2.5" fill="white" />
-        <rect x="246" y="228" width="108" height="31" rx="15.5" className="center-info-plate" />
-        <text x="300" y="249" textAnchor="middle" className="today-date">{formatDate(now)}</text>
-        <rect x="252" y="337" width="96" height="28" rx="14" className="center-info-plate" />
-        <text x="300" y="356" textAnchor="middle" className="today-time">{now.toLocaleTimeString("en-GB")}</text>
+        <text x="300" y="254" textAnchor="middle" className="dial-year">{year}</text>
+        <g className="export-hide">
+          <line x1={needleTail.x} y1={needleTail.y} x2={currentPoint.x} y2={currentPoint.y} stroke="var(--needle-mid)" strokeWidth="11" strokeLinecap="round" opacity="0.12" filter="url(#needle-glow)" />
+          <line x1={needleTail.x} y1={needleTail.y} x2={currentPoint.x} y2={currentPoint.y} stroke="url(#needle-gradient)" strokeWidth="5.5" strokeLinecap="round" />
+          <line x1={needleTail.x} y1={needleTail.y} x2={currentPoint.x} y2={currentPoint.y} stroke="white" strokeWidth="1.1" strokeLinecap="round" opacity="0.72" />
+          <polygon points={arrowPoints} fill="var(--needle-end)" stroke="var(--surface-solid)" strokeWidth="1.5" strokeLinejoin="round" />
+          <circle cx={currentPoint.x} cy={currentPoint.y} r="12" fill="none" stroke="var(--needle-mid)" strokeWidth="2" opacity="0.25" className="needle-pulse" />
+          <circle cx={currentPoint.x} cy={currentPoint.y} r="4.5" fill="var(--needle-end)" stroke="var(--surface-solid)" strokeWidth="2" />
+          <circle cx="300" cy="300" r="14" fill="var(--hub-light)" stroke="var(--surface-solid)" strokeWidth="4" filter="url(#soft-shadow)" />
+          <circle cx="300" cy="300" r="9" fill="url(#hub-gradient)" stroke="var(--needle-end)" strokeWidth="1.5" />
+          <circle cx="300" cy="300" r="2.5" fill="white" />
+        </g>
       </svg>
     </div>
   );
@@ -192,6 +191,8 @@ export default function Home() {
   const [now, setNow] = useState(() => new Date());
   const [year, setYear] = useState(2026);
   const [managed, setManaged] = useState<ManagedConference[]>([]);
+  const [exporting, setExporting] = useState(false);
+  const dialRef = useRef<SVGSVGElement>(null);
   useEffect(() => { const timer = window.setInterval(() => setNow(new Date()), 1000); return () => window.clearInterval(timer); }, []);
   useEffect(() => {
     async function load() {
@@ -221,6 +222,64 @@ export default function Home() {
   const yearItems = useMemo(() => allDeadlines.filter((item) => Number(item.date.slice(0, 4)) === year), [allDeadlines, year]);
   const sorted = useMemo(() => [...yearItems].sort((a, b) => a.date.localeCompare(b.date)), [yearItems]);
 
+  async function saveClockImage() {
+    if (!dialRef.current || exporting) return;
+    setExporting(true);
+    try {
+      const source = dialRef.current;
+      const clone = source.cloneNode(true) as SVGSVGElement;
+      clone.querySelectorAll(".export-hide").forEach((node) => node.remove());
+      clone.removeAttribute("class");
+      clone.setAttribute("width", "3120");
+      clone.setAttribute("height", "2640");
+
+      const yearLabel = clone.querySelector(".dial-year");
+      yearLabel?.setAttribute("y", "316");
+      yearLabel?.setAttribute("style", "font-size:42px;font-weight:850;letter-spacing:-0.045em");
+
+      const rootStyles = getComputedStyle(document.documentElement);
+      const variables = ["paper", "ink", "dial-face", "dial-sector", "dial-sector-alt", "dial-inner", "dial-core", "dial-stroke", "dial-grid", "dial-tick", "surface-solid"];
+      const cssVariables = variables.map((name) => `--${name}:${rootStyles.getPropertyValue(`--${name}`).trim()};`).join("");
+      const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+      style.textContent = `svg{${cssVariables}}.month-label{font:800 10px Inter,Arial,sans-serif;fill:#64748b;letter-spacing:.09em}.deadline-label-box{fill:var(--surface-solid);stroke-width:1px}.deadline-label{font:850 9px Inter,Arial,sans-serif;letter-spacing:.025em}.dial-year{font-family:Inter,Arial,sans-serif;fill:var(--ink)}`;
+      clone.insertBefore(style, clone.firstChild);
+
+      const background = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      background.setAttribute("x", "-90");
+      background.setAttribute("y", "-30");
+      background.setAttribute("width", "780");
+      background.setAttribute("height", "660");
+      background.setAttribute("fill", rootStyles.getPropertyValue("--paper").trim());
+      clone.insertBefore(background, style.nextSibling);
+
+      const serialized = new XMLSerializer().serializeToString(clone);
+      const svgUrl = URL.createObjectURL(new Blob([serialized], { type: "image/svg+xml;charset=utf-8" }));
+      const image = new Image();
+      await new Promise<void>((resolve, reject) => { image.onload = () => resolve(); image.onerror = () => reject(new Error("Could not render the clock image.")); image.src = svgUrl; });
+      const canvas = document.createElement("canvas");
+      canvas.width = 3120;
+      canvas.height = 2640;
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("Canvas is unavailable.");
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(svgUrl);
+      const png = await new Promise<Blob>((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("Could not create the PNG.")), "image/png"));
+      const pngUrl = URL.createObjectURL(png);
+      const link = document.createElement("a");
+      link.href = pngUrl;
+      link.download = `deadline-clock-${year}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(pngUrl), 0);
+    } catch (error) {
+      console.error(error);
+      window.alert("The clock image could not be saved. Please try again.");
+    } finally {
+      setExporting(false);
+    }
+  }
+
   return <main className="app-shell">
     <header className="topbar">
       <div><div className="eyebrow"><span className="live-dot" /> RESEARCH PLANNER</div><h1>Deadline Clock</h1><p>Conference deadlines, mapped across the year.</p></div>
@@ -233,8 +292,8 @@ export default function Home() {
     </header>
     <section className="workspace">
       <div className="dial-panel">
-        <div className="panel-heading"><div><span className="section-number">01</span><h2>{year} year dial</h2></div><p>The hand advances in real time</p></div>
-        <DeadlineDial year={year} now={now} items={yearItems} />
+        <div className="panel-heading"><div><span className="section-number">01</span><h2>{year} year dial</h2></div><button className="export-button" type="button" onClick={saveClockImage} disabled={exporting}><ImageDown size={16} />{exporting ? "Saving…" : `Save ${year} PNG`}</button></div>
+        <DeadlineDial year={year} now={now} items={yearItems} svgRef={dialRef} />
         <div className="legend"><span><i className="hand" /> Today</span><span><i className="blue" /> Submission deadline</span></div>
       </div>
       <aside className="deadline-panel">
