@@ -3,6 +3,8 @@
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D22.13-339933?logo=node.js&logoColor=white)](package.json)
 
+**Live demo:** [deadline-clock.tangguo1999.chatgpt.site](https://deadline-clock.tangguo1999.chatgpt.site/)
+
 An interactive year dial for tracking research conference deadlines. Deadline Clock combines a circular calendar, a chronological deadline list, source-aware deadline updates, and a high-resolution image export in a responsive web app.
 
 ![Deadline Clock interface](docs/deadline-clock.jpg)
